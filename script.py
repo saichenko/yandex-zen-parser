@@ -17,44 +17,12 @@ CURRENT_PROXY = None
 data = []
 
 
-def set_proxies_and_uas():
-    """
-    Setting valid proxies.
-    """
-    global PROXIES, USER_AGENTS, CURRENT_PROXY, USER_AGENT
-
-    with open('proxies.txt', 'r') as f:
-        proxies = f.readlines()
-
-    with open('user-agents.txt', 'r') as f:
-        USER_AGENTS = f.readlines()
-
-    USER_AGENT = USER_AGENTS[0]
-
-    print('Ждите, идёт конфигурация прокси серверов.')
-    for proxy in tqdm(proxies[:20]):
-        try:
-            status = requests.get('https://www.google.com/', proxies={'http': 'http://'+proxy}).status_code
-        except Exception:
-            continue
-        if status == 200:
-            PROXIES.append(proxy)
-    CURRENT_PROXY = proxy[0]
-    print(f'{len(PROXIES)} proxy servers configured.')
-
-
 def count_pages() -> int:
     resp = requests.get('https://zen.yandex.ru/media/zen/channels').content
     soup = BeautifulSoup(resp, 'lxml')
     quan = int(soup.find('span', {'class':'channels-counter'}).text.split()[0])
 
     return quan*1000//20
-
-
-def change_proxy_and_ua():
-    global CURRENT_PROXY, PROXIES, USER_AGENTS, USER_AGENT
-    USER_AGENT = random.choice(USER_AGENTS)
-    CURRENT_PROXY = random.choice(PROXIES)
 
 
 def get_range() -> tuple:
@@ -131,7 +99,6 @@ async def main(urls, starts, to):
 
 if __name__ == '__main__':
     starts, to = get_range()
-    set_proxies_and_uas()
 
     df_list = []
     for page in tqdm(range(1, count_pages() + 1)):
